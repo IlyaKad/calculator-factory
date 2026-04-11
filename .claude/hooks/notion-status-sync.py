@@ -87,7 +87,9 @@ def resolve_status(tool_name: str, file_path: str) -> str | None:
 
 def main():
     try:
-tml_name  = event.get("tool_name", "")
+        event = json.load(sys.stdin)
+
+        tool_name  = event.get("tool_name", "")
         tool_input = event.get("tool_input", {})
         file_path  = tool_input.get("file_path", "")
 
