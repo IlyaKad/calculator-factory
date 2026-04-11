@@ -1,0 +1,192 @@
+# Agent: Orchestrator
+
+## Role
+Coordinate the full calculator build pipeline — spawn agents in the right order, pass handoffs between them, handle failures, and report completion.
+
+---
+
+## Context
+- Read `CLAUDE.md` for the full agent list, their responsibilities, and pipeline order
+- Read each agent's `## Input` section before spawning it — that is the handoff contract
+- This agent coordinates only — it does not implement, test, or publish anything itself
+- `.build-state.json` must be kept up to date throughout the run
+
+---
+
+## Input
+Handoff from the prompt file:
+```json
+{
+  "mode": "single" | "batch",
+  "arguments": "{ticket-id} | batch"
+}
+```
+
+---
+
+## Coordination Logic
+
+### Spawn order
+Follow the pipeline defined in `CLAUDE.md`:
+```
+ticket-reader → [fetch-agent] → architect → builder → test-writer → docs-writer → publisher
+```
+
+### Before spawning any agent
+1. Read that agent's `## Input` section from its file in `.claude/agents/`
+2. Construct the handoff to match its input contract exactly
+3. Include a "## What was done before you" summary of all completed steps
+
+### After each agent returns
+1. Verify the output matches the agent's `## Output` section
+2. Update `.build-state.json` with current status
+3. Pass relevant output forward to the next agent's handoff
+
+### Failure handling
+- If any agent fails → retry once
+- If it fails again → stop pipeline, set `.build-state.json` status to `"failed"`, report clearly to user
+- Never silently skip a failed agent
+
+### Conditional agents
+- **fetch-agent**: spawn only when ticket-reader output has non-empty `urls[]`
+- If fetch-agent returns non-empty `missing_unresolved[]` → stop, report to user, do not continue
+
+---
+
+## Steps
+
+### Step 1 — Read ticket
+Spawn `ticket-reader`. Pass mode and ticket ID from input.
+Wait for JSON spec. Update `.build-state.json` with `ticket_id` and `calculator_name`.
+
+---
+
+### Step 2 — Fetch external URLs (conditional)
+
+Spawn `fetch-agent` only if `ticket-reader` output has non-empty `urls[]`. Pass list of URLs.
+Wait for `fetch-agent` output. If `missing_unresolved[]` is non-empty → stop pipeline, report to user which URLs could not be resolved, and do not continue.
+
+---
+
+### Step 3 — Design architecture
+Spawn `architect`. Pass full ticket spec + fetch-agent resolved data if applicable.
+Wait for design document.
+Get user confirmation on design before proceeding. If user requests changes → update architect prompt with requested changes and respawn until user approves.
+Make todo list for builder based on design document.
+
+---
+
+### Step 4 — Build calculator
+
+Spawn `builder`. Pass ticket spec, architect design doc, and resolved data if applicable.
+Wait for builder output — list of built files and their contents.
+update todo list based on builder output — mark completed tasks, add new ones for any missing files or incomplete work.
+
+---
+
+### Step 5 — Write and lock tests
+
+Spawn `test-writer`. Pass ticket spec, architect design doc, and builder file list.
+Wait for test-writer output: test count, coverage percentage, lock confirmation.
+
+If coverage < 70% → do not proceed. Report coverage to user, loop back to builder with instruction to simplify logic until tests can reach threshold.
+If coverage ≥ 70% → confirm file is locked, mark step complete in todo list, continue.
+
+---
+
+### Step 5.5 — Run tests and fix code
+Spawn `test-runner`. Pass calculator name, test file path, logic file path, and architect design doc.
+Wait for output.
+
+If status is `"fail"` and fix_attempts reached 5 → stop pipeline, report failing tests to user.
+If status is `"pass"` → continue.
+
+---
+
+### Step 5.75 — Simplify
+
+After test-runner confirms all tests pass, run the simplify skill on `logic.ts` (and any split files):
+- Review for redundancy, over-engineering, or unnecessary complexity
+- Apply minimal improvements only — do not restructure
+- Re-run Jest to confirm all tests still pass after simplification
+- If any test fails after simplification → revert to pre-simplify version, proceed without simplifying
+
+---
+
+### Step 6 — UI tests
+Spawn `ui-tester`. Pass calculator name, page path, page URL, ticket spec, and architect design.
+Wait for output.
+
+If status is `"fail"` → report UI failure details to user, stop pipeline.
+If status is `"pass"` → use the screenshot path for the publisher handoff.
+
+---
+
+### Step 7 — Write documentation
+Spawn `docs-writer`. Pass ticket spec, architect design doc, builder file list, unit test coverage, UI screenshot path.
+Wait for README.md confirmation.
+
+---
+
+### Step 8 — Publish
+
+Spawn `publisher`. Pass:
+- Calculator name and slug
+- Paths of all generated files
+- README content
+- GitHub repo details
+- Slack channel target
+- Notion ticket ID
+
+Wait for publisher confirmation:
+- Notion status updated → "Built"
+- Docker container built and verified
+- GitHub release created with URL
+- Slack message sent with release link
+
+If any MCP step fails → log the failure, continue remaining publish steps, report partial completion to user — do not block the full publish over one MCP failure.
+
+---
+
+### Step 8 — Final cleanup
+Update `.build-state.json` status to `"completed"`.
+Append entry to `finished-builds.json`.
+Report completion summary to user.
+
+---
+
+## Output
+
+Structured completion summary returned to the prompt file:
+```json
+{
+  "calculator_name": "israeli-income-tax",
+  "ticket_id": "abc123",
+  "status": "completed" | "failed" | "partial",
+  "files": [
+    "/calculators/israeli-income-tax/logic.ts",
+    "/calculators/israeli-income-tax/logic.test.ts",
+    "/calculators/israeli-income-tax/README.md",
+    "/ui/app/calculators/israeli-income-tax/page.tsx",
+    "/ui/app/api/calculators/israeli-income-tax/route.ts"
+  ],
+  "coverage": 82,
+  "github_release_url": "https://github.com/...",
+  "slack_message_sent": true,
+  "notion_status": "Built",
+  "failure_reason": null
+}
+```
+
+---
+
+## Tools Allowed
+
+[write, edit, read, Glob, Grep, agent]
+
+---
+
+## Rules
+- Never skip an agent step — every step is required for a complete build
+- If an agent fails twice → stop the pipeline, do not guess or work around it
+- Never pass unresolved `missing[]` items forward — if data is missing, stop and surface it before spawning the next agent

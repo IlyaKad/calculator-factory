@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "notion": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@anthropic-ai/mcp-server-notion"],
+      "env": {
+        "NOTION_API_KEY": "${NOTION_TOKEN}"
+      }
+    },
+    "github": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@anthropic-ai/mcp-server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "slack": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@anthropic-ai/mcp-server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+      }
+    },
+    "playwright": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp"]
+    },
+    "docker": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@anthropic-ai/mcp-server-docker"]
+    }
+  }
+}

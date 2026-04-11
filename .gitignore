@@ -1,0 +1,13 @@
+# Secrets — never commit
+.env
+*.env.*
+
+# Runtime output
+logs/
+
+# Node
+node_modules/
+
+# Build state (runtime)
+.build-state.json
+finished-builds.json
