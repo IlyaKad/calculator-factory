@@ -88,6 +88,15 @@ The orchestrator decides whether to include it based on ticket-reader output.
 
 ---
 
+## Defaults
+
+| Setting | Value |
+|---|---|
+| Slack channel | `#claude` |
+| GitHub repo | `IlyaKad/calculator-factory` |
+
+---
+
 ## Rules
 
 All hard constraints are in `rules.md`. Every agent must follow them.
@@ -98,8 +107,8 @@ All hard constraints are in `rules.md`. Every agent must follow them.
 
 This is a hands-on learning project for Claude Code entities.
 At the start of every session, read:
-- SYLLABUS.md — full phase plan and instructions
-- TEACHER_SETTINGS.md — teaching style and preferences
+- `docs/SYLLABUS.md` — full phase plan and instructions
+- `docs/TEACHER_SETTINGS.md` — teaching style and preferences
 
 Teaching mode is always ON. Explain WHY before HOW.
 Guide Ilya to write — do not write for him unless asked.

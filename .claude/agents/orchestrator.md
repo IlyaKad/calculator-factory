@@ -55,6 +55,14 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 
 ## Steps
 
+### Step 0 — Read memory
+Read `.claude/memory.json`.
+Check `calculators[]` for an entry matching this `ticket_id` with `status: "built"`.
+If found → stop, report to user: "This calculator was already built on {build_time}. Use `/build-calculator` with a different ticket or pass `--force` to rebuild."
+If not found → continue.
+
+---
+
 ### Step 1 — Read ticket
 Spawn `ticket-reader`. Pass mode and ticket ID from input.
 Wait for JSON spec. Update `.build-state.json` with `ticket_id` and `calculator_name`.
@@ -72,6 +80,15 @@ Wait for `fetch-agent` output. If `missing_unresolved[]` is non-empty → stop p
 Spawn `architect`. Pass full ticket spec + fetch-agent resolved data if applicable.
 Wait for design document.
 Get user confirmation on design before proceeding. If user requests changes → update architect prompt with requested changes and respawn until user approves.
+Once approved → record the decision in `.claude/memory.json` under `decisions[]`:
+```json
+{
+  "ticket_id": "{ticket_id}",
+  "calculator_name": "{slug}",
+  "decision": "Approved architect design: {one-line summary of function signature and key design choices}",
+  "timestamp": "{ISO timestamp}"
+}
+```
 Make todo list for builder based on design document.
 
 ---
@@ -148,9 +165,25 @@ If any MCP step fails → log the failure, continue remaining publish steps, rep
 
 ---
 
-### Step 8 — Final cleanup
+### Step 9 — Final cleanup
 Update `.build-state.json` status to `"completed"`.
 Append entry to `finished-builds.json`.
+
+Write completed build to `.claude/memory.json` — append to `calculators[]`:
+```json
+{
+  "ticket_id": "{ticket_id}",
+  "name": "{calculator display name}",
+  "description": "{one-line description from ticket spec}",
+  "status": "built",
+  "build_time": "{ISO timestamp}",
+  "path": "calculators/{slug}/",
+  "coverage": {coverage},
+  "github_release_url": "{url from publisher output}"
+}
+```
+Also update `builds.last_ticket_id`, `builds.last_calculator_name`, and increment `builds.total_built`.
+
 Report completion summary to user.
 
 ---

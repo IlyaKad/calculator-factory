@@ -11,3 +11,13 @@ node_modules/
 # Build state (runtime)
 .build-state.json
 finished-builds.json
+.claude/memory.json
+
+# Playwright MCP snapshots (runtime)
+.playwright-mcp/
+
+# Local MCP overrides (machine-specific)
+.mcp.json
+
+# Local Claude Code settings (machine-specific, may contain personal preferences)
+.claude/settings.local.json
