@@ -107,16 +107,16 @@ skills/{name}.md                   ← passive domain knowledge
 .claude/hooks/{event}.py           ← hook scripts
 .claude/mcp_settings.json          ← MCP server config
 .claude/memory.json                ← persistent runtime state
-.env                               ← credentials (gitignored)
-.env.example                       ← credential template (committed)
 .build-state.json                  ← current run state (runtime, gitignored)
 finished-builds.json               ← completed runs log (runtime, gitignored)
 logs/audit.log                     ← hook audit trail (runtime, gitignored)
 calculators/{name}/logic.ts        ← generated: pure calculator logic
 calculators/{name}/logic.test.ts   ← generated: Jest tests (LOCKED)
+calculators/{name}/app/page.tsx    ← generated: React UI
+calculators/{name}/app/api/route.ts ← generated: Next.js API route
+calculators/{name}/package.json    ← generated: standalone dependencies
+calculators/{name}/Dockerfile      ← generated: runs calculator as container
 calculators/{name}/README.md       ← generated: usage docs
-ui/app/calculators/{name}/page.tsx ← generated: React UI
-ui/app/api/calculators/{name}/route.ts ← generated: API route
 ```
 
 ---

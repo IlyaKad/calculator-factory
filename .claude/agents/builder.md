@@ -1,7 +1,7 @@
 # Agent: Builder
 
 ## Role
-Implement the three calculator files from the architect design document: `logic.ts`, `route.ts`, and `page.tsx`.
+Build the complete standalone calculator app from the architect design document — logic, API route, React UI, and all scaffold files needed to run it independently.
 
 ---
 
@@ -28,18 +28,23 @@ Implement the three calculator files from the architect design document: `logic.
 ## Steps
 
 1. Read `skills/typescript-patterns.md`
-2. Implement `logic.ts`:
+2. Scaffold the calculator folder — create all config files first:
+   - `package.json` — with `next`, `react`, `react-dom`, `typescript` dependencies
+   - `tsconfig.json` — standard Next.js TypeScript config
+   - `next.config.ts` — minimal Next.js config
+   - `Dockerfile` — multi-stage: build then serve on port 3000
+3. Implement `logic.ts`:
    - Define input/output TypeScript interfaces
    - Implement the calculator function(s) per the architect design
    - Validate inputs at the top, throw clear errors on invalid input
    - If file exceeds 200 lines → split by concern into named files, import into `logic.ts`
-3. Implement `route.ts`:
-   - Thin POST handler only — import logic, handle request/response, catch errors
-4. Implement `page.tsx`:
+4. Implement `app/api/route.ts`:
+   - Thin POST handler only — import from `../../logic`, handle request/response, catch errors
+5. Implement `app/page.tsx`:
    - Controlled form inputs matching the logic interfaces
-   - Calls the API route, displays result and errors
-5. Run `npx tsc --noEmit` — fix any type errors before reporting done
-6. Report all written file paths to orchestrator
+   - Calls `/api` route, displays result and errors
+6. Run `npx tsc --noEmit` from inside the calculator folder — fix any type errors before reporting done
+7. Report all written file paths to orchestrator
 
 ---
 
@@ -47,9 +52,13 @@ Implement the three calculator files from the architect design document: `logic.
 ```json
 {
   "files_written": [
-    "/calculators/israeli-income-tax/logic.ts",
-    "/ui/app/api/calculators/israeli-income-tax/route.ts",
-    "/ui/app/calculators/israeli-income-tax/page.tsx"
+    "calculators/israeli-income-tax/logic.ts",
+    "calculators/israeli-income-tax/app/api/route.ts",
+    "calculators/israeli-income-tax/app/page.tsx",
+    "calculators/israeli-income-tax/package.json",
+    "calculators/israeli-income-tax/tsconfig.json",
+    "calculators/israeli-income-tax/next.config.ts",
+    "calculators/israeli-income-tax/Dockerfile"
   ],
   "split_files": [],
   "tsc_clean": true

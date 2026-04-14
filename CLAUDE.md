@@ -7,36 +7,47 @@ and autonomously builds it as a full-stack TypeScript feature — end to end.
 
 ## Tech Stack
 
-- **Server:** Next.js API routes (Node.js, TypeScript) — handles HTTP, runs calculator logic
-- **Client:** Next.js + React 18 (TypeScript) — form UI, sends requests, displays results
-- **Framework:** Next.js — full-stack, one project, one `npm run dev`. React runs in the browser, API routes run on the server.
-- **Testing:** Jest — tests target pure logic only, no framework dependencies
-- **Infra:** Docker
+- **Per calculator:** standalone Next.js app — its own `package.json`, `Dockerfile`, UI and API route
+- **Logic:** pure TypeScript function — no framework, no HTTP, fully unit-testable
+- **UI:** Next.js + React 18 (TypeScript) — form inputs, calls own API route, shows result
+- **API:** Next.js API route — thin wrapper around logic.ts
+- **Testing:** Jest — targets pure logic only, no framework dependencies
+- **Infra:** Docker — each calculator builds and runs as its own container
 - **Integrations (via MCP):** Notion, GitHub, Slack, Playwright, Docker
 
 ---
 
 ## Output Convention
 
-Each calculator generates files in two locations:
+Each calculator is a fully standalone app — copy the folder, run it independently:
 
 ```
-/calculators/{name}/
-  logic.ts          ← pure calculator logic — no framework, fully testable
-  logic.test.ts     ← Jest tests (LOCKED after test-writer runs — read-only)
-  README.md         ← usage docs
-
-/ui/app/calculators/{name}/
-  page.tsx          ← React page — form inputs, calls API, shows result
-
-/ui/app/api/calculators/{name}/
-  route.ts          ← Next.js API route — thin wrapper around logic.ts
+calculators/{name}/
+  logic.ts              ← pure calculator logic — no framework, fully testable
+  logic.test.ts         ← Jest tests (LOCKED after test-writer runs — read-only)
+  app/
+    page.tsx            ← React UI — form inputs, calls API route, shows result
+    api/
+      route.ts          ← Next.js API route — thin wrapper around logic.ts
+  package.json          ← next, react, typescript dependencies
+  tsconfig.json
+  next.config.ts
+  Dockerfile
+  README.md
 ```
 
-**Why this split:**
+**To run a calculator independently:**
+```bash
+cd calculators/{name}
+npm install && npm run dev     # dev server on localhost:3000
+docker build -t {name} . && docker run -p 3000:3000 {name}   # containerized
+```
+
+**Why this structure:**
+- The folder is the unit — zip it, copy it, push it to its own repo
 - `logic.ts` is pure TypeScript — no HTTP, no React, no framework. Easy to test.
-- `route.ts` is a thin HTTP adapter — imports logic, handles request/response.
-- `page.tsx` is a thin UI adapter — form state, fetch call, result display.
+- `app/api/route.ts` is a thin HTTP adapter — imports logic, handles request/response.
+- `app/page.tsx` is a thin UI adapter — form state, fetch call, result display.
 
 ---
 
