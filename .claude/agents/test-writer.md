@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Writes and locks Jest tests for logic.ts from its public interface
+---
+
 # Agent: Test Writer
 
 ## Role

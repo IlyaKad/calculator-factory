@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Implements logic.ts, route.ts, and page.tsx from the approved architect design
+---
+
 # Agent: Builder
 
 ## Role

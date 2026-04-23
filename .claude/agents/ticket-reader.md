@@ -1,3 +1,8 @@
+---
+model: claude-opus-4-7
+description: Reads and analyses Notion tickets — uses Opus to avoid misreading ambiguous specs
+---
+
 # Agent: Ticket Reader
 
 ## Role

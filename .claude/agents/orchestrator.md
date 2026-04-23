@@ -1,3 +1,8 @@
+---
+model: claude-opus-4-7
+description: Coordinates the full build pipeline — uses Opus for high-stakes planning and routing decisions
+---
+
 # Agent: Orchestrator
 
 ## Role

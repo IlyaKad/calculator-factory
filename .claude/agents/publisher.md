@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Publishes via Notion, Docker, GitHub, and Slack
+---
+
 # Agent: Publisher
 
 ## Role

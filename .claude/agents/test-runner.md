@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Runs locked Jest tests and fixes logic.ts until all pass
+---
+
 # Agent: Test Runner
 
 ## Role

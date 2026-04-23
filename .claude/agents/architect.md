@@ -1,3 +1,8 @@
+---
+model: claude-opus-4-7
+description: Designs TypeScript architecture and UI — uses Opus for careful design decisions before implementation locks them in
+---
+
 # Agent: Architect
 
 ## Role

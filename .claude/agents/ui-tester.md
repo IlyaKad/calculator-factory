@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Writes and runs Playwright UI tests; fixes page.tsx on failures
+---
+
 # Agent: UI Tester
 
 ## Role

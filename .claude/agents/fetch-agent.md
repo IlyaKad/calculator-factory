@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Fetches and extracts content from external URLs referenced in the ticket
+---
+
 # Agent: Fetch Agent
 
 ## Role

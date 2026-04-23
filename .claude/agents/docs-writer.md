@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Writes README.md from ticket spec and architect design
+---
+
 # Agent: Docs Writer
 
 ## Role
