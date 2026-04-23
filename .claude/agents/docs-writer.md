@@ -19,7 +19,8 @@ Write the README.md for a completed calculator — covering purpose, inputs, out
   "ticket_spec": "{full ticket spec JSON}",
   "architect_design": "{design doc}",
   "files_written": ["/calculators/...", "/ui/..."],
-  "coverage": 82
+  "coverage": 82,
+  "screenshot_path": "logs/israeli-income-tax-ui-screenshot.png"
 }
 ```
 
@@ -29,6 +30,7 @@ Write the README.md for a completed calculator — covering purpose, inputs, out
 
 1. Write `README.md` to `/calculators/{name}/README.md` with these sections:
    - **Purpose** — one paragraph from the ticket description
+   - **Screenshot** — embed the UI screenshot: `![Calculator UI]({screenshot_path})`. If screenshot_path is null or missing, write `<!-- screenshot not available -->` as a placeholder comment
    - **Inputs** — table of input fields, types, and validation rules
    - **Outputs** — table of output fields and what they represent
    - **API** — endpoint, method, request/response example

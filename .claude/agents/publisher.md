@@ -43,9 +43,17 @@ Add links to generated files in the ticket body.
 ### 2 — Docker: build and verify container
 Build Docker image for the calculator:
 ```bash
-docker build -t calculator-factory/{name}:latest .
+cd calculators/{name} && docker build -t calculator-factory/{name}:latest .
+echo "EXIT: $?"
 ```
-Run the container and verify it starts and exits cleanly.
+**Check exit code.** If non-zero → record in `failures[]` with the full build output, continue to next step. Do NOT report Docker as successful unless exit code is 0.
+Run a smoke test on the built image:
+```bash
+docker run --rm -p 3001:3000 -d --name {name}-smoke calculator-factory/{name}:latest
+sleep 3
+curl -f http://localhost:3001 && echo "OK" || echo "FAIL"
+docker stop {name}-smoke
+```
 Log output to `logs/audit.log`.
 
 ### 3 — Playwright: screenshot the UI
@@ -53,19 +61,31 @@ Use Playwright MCP to open the calculator UI page in a headless browser.
 Fill in sample inputs, submit, capture a screenshot of the result.
 Save screenshot to `logs/{name}-screenshot.png`.
 
-### 4 — GitHub: create a release
-Use GitHub MCP to create a release:
-- Tag: `{name}-v1.0.0`
-- Title: `{calculator_name} — v1.0.0`
-- Body: contents of README.md
-- Attach screenshot
+### 4 — GitHub: commit and push
+Stage all generated files, commit, and push directly to the current branch — do not create a PR:
+```bash
+git add calculators/{name}/
+git commit -m "feat: add {calculator_name} calculator
+
+- {one-line summary from ticket spec}
+- Coverage: {coverage}%
+- Operators: {operator list if applicable}"
+git push origin HEAD
+```
+If push fails → record in `failures[]` with the exact error, output the commands the user must run manually:
+```
+Manual recovery:
+  git add calculators/{name}/
+  git commit -m "feat: add {calculator_name} calculator"
+  git push origin HEAD
+```
 
 ### 5 — Slack: post announcement
 Use Slack MCP to post to the configured channel:
 - Calculator name
-- GitHub release URL
+- Branch/commit URL (format: `https://github.com/{repo}/tree/{branch}`)
 - Coverage percentage
-- Screenshot attached
+- Screenshot attached (if available from ui-tester)
 
 ---
 
@@ -74,8 +94,10 @@ Use Slack MCP to post to the configured channel:
 {
   "notion_updated": true,
   "docker_built": true,
+  "docker_smoke_passed": true,
   "screenshot_path": "logs/israeli-income-tax-screenshot.png",
-  "github_release_url": "https://github.com/owner/repo/releases/tag/...",
+  "github_pushed": true,
+  "commit_sha": "abc123",
   "slack_sent": true,
   "failures": []
 }

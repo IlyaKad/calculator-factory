@@ -61,4 +61,5 @@ Write Jest tests for `logic.ts` from its interface — not its implementation �
 
 ## Rules
 - Write tests from the interface and spec — never read the implementation to write tests
+- Every item in the architect's **Guards Checklist** must have a corresponding test — if a guard has no test, the test-writer must add one before locking. Report any untested guards to the orchestrator.
 - If coverage cannot reach 70% after 3 attempts → report to orchestrator, do not lock

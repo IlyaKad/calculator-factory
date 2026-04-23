@@ -55,7 +55,28 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 
 ## Steps
 
-### Step 0 — Read memory
+### Step 0a — Preflight: verify all required connections
+Before doing anything else, verify every integration that will be needed is reachable.
+
+Run these checks:
+1. **Notion MCP** — fetch the workspace root or any page. If it fails → stop, tell user: "Notion MCP is not connected. Check your MCP config."
+2. **GitHub** — run `gh auth status`. If it fails → stop, tell user: "GitHub CLI is not authenticated. Run `gh auth login` first."
+3. **Slack MCP** — send a test ping (list channels). If it fails → warn user, but do not stop (Slack is non-blocking)
+4. **Docker** — run `docker info`. If it fails → warn user, but do not stop (Docker failure is non-blocking — publisher will record it)
+
+Report preflight results as a short table before proceeding:
+```
+✓ Notion — connected
+✓ GitHub — authenticated as IlyaKad
+⚠ Slack — not reachable (will skip Slack step)
+✓ Docker — running
+```
+
+If any **blocking** check fails (Notion or GitHub) → stop immediately. Do not write `.build-state.json` or proceed.
+
+---
+
+### Step 0b — Read memory
 Read `.claude/memory.json`.
 Check `calculators[]` for an entry matching this `ticket_id` with `status: "built"`.
 If found → stop, report to user: "This calculator was already built on {build_time}. Use `/build-calculator` with a different ticket or pass `--force` to rebuild."
@@ -140,7 +161,13 @@ If status is `"pass"` → use the screenshot path for the publisher handoff.
 ---
 
 ### Step 7 — Write documentation
-Spawn `docs-writer`. Pass ticket spec, architect design doc, builder file list, unit test coverage, UI screenshot path.
+Spawn `docs-writer`. Pass:
+- ticket spec
+- architect design doc
+- builder file list
+- unit test coverage percentage
+- `screenshot_path` from ui-tester output (required — docs-writer will embed it in the README)
+
 Wait for README.md confirmation.
 
 ---

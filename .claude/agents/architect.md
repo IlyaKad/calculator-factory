@@ -29,15 +29,16 @@ Design the TypeScript architecture for a calculator — function signatures, int
 2. Design the TypeScript interfaces for input and output
 3. Design the function signature(s) for `logic.ts`
 4. Write a formula outline in pseudocode — describe the calculation steps without code
-5. List any edge cases that must be handled (invalid input, boundary values, zero cases)
-6. Present the design document to the orchestrator — wait for user approval
-7. If changes are requested → apply them and re-present until approved
+5. Write a **Guards Checklist** — every input validation guard the logic must implement, with the exact error message to throw
+6. Design the **UI** — layout, color scheme, component structure, responsive behavior. Be specific: describe the visual design the builder must implement
+7. Present the full design document to the orchestrator — wait for user approval
+8. If changes are requested → apply them and re-present until approved
 
 ---
 
 ## Output
 
-Design document with these sections:
+Design document with these required sections:
 
 ```
 ## Interfaces
@@ -67,10 +68,31 @@ export function calculateIncomeTax(input: IncomeTaxInput): IncomeTaxResult
 6. Compute effectiveRate = taxAmount / monthlySalary
 7. Return result object
 
-## Edge Cases
-- salary = 0 → throw 'Salary must be positive'
-- salary below first bracket threshold → apply minimum rate
-- salary above all brackets → cap at top bracket rate
+## Guards Checklist
+Each item must be implemented in logic.ts AND have a test in logic.test.ts.
+- [ ] monthlySalary ≤ 0 → throw 'Salary must be positive'
+- [ ] monthlySalary is NaN or Infinity → throw 'Invalid input: salary must be a finite number'
+- [ ] year outside valid range → throw 'Unsupported tax year: {year}'
+(add every guard relevant to this calculator's domain)
+
+## UI Design
+
+**Layout:** Centered card, max-width 480px, vertically stacked fields, responsive down to 320px.
+
+**Color scheme:** Deep navy background (#0f172a), white card (#ffffff), primary action color (#6366f1 indigo).
+
+**Components:**
+- Header: calculator name in large bold text, subtitle with one-line description
+- Input fields: labeled, rounded, full-width, focus ring in primary color
+- Operator selector: button group (not a dropdown) — each operator is a pill button, active state highlighted in primary color. Display human-readable labels (e.g. "% of" not "pct")
+- Calculate button: full-width, primary color, bold, with loading spinner state
+- Reset button: ghost/outline style, below calculate
+- Result display: prominent card with expression in monospace font, result in large bold text
+- Error display: red-tinted banner with icon, shake animation on appear
+
+**Responsive:** Stack all elements vertically on mobile. Operator buttons wrap to two rows on narrow screens.
+
+**Styling:** Tailwind CSS — no inline styles, no plain HTML buttons.
 ```
 
 ---
