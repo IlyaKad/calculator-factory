@@ -21,48 +21,55 @@ Write and run Playwright tests for the calculator's React page — verify the UI
 ## Input
 ```json
 {
-  "calculator_name": "israeli-income-tax",
-  "page_path": "/ui/app/calculators/israeli-income-tax/page.tsx",
-  "page_url": "http://localhost:3000/calculators/israeli-income-tax",
+  "calculator_name": "basic-calculator",
+  "page_path": "calculators/basic-calculator/app/page.tsx",
+  "page_url": "http://localhost:3000",
   "ticket_spec": "{full ticket spec JSON — use examples[] for test inputs}",
   "architect_design": "{design doc — use for expected output values}"
 }
 ```
 
+Note: each calculator is a **standalone Next.js app** at `calculators/{name}/`. The dev server runs from that folder and serves on `http://localhost:3000` (root path, not a sub-path).
+
 ---
 
 ## Steps
 
-1. Start the Next.js dev server:
+1. Start the Next.js dev server for this calculator:
    ```bash
-   cd ui && npx next dev --port 3000
+   cd calculators/{name} && npx next dev --port 3000
    ```
-   Wait for server to be ready (check for "ready" in output), max 30 seconds.
+   Wait for server to be ready (check for "Ready" or "started server" in output), max 60 seconds.
    If server fails to start → report to orchestrator, stop.
 
-2. Write `page.test.ts` to `/ui/tests/{name}/page.test.ts`.
+2. Write `playwright.test.ts` to `calculators/{name}/playwright.test.ts`.
    Use `ticket_spec.examples[]` as the source of test inputs and expected outputs — do not invent values.
    Cover the calculator's critical paths: at minimum, a successful calculation, an error state, and any reset/clear behaviour if present.
+   Target URL is always `http://localhost:3000` (root).
 
-3. Run Playwright tests:
+3. Run Playwright tests from the calculator folder:
    ```bash
-   npx playwright test ui/tests/{name}/page.test.ts
+   cd calculators/{name} && npx playwright test playwright.test.ts
+   ```
+   If Playwright is not installed in the calculator folder:
+   ```bash
+   cd calculators/{name} && npm install --save-dev @playwright/test && npx playwright install chromium
    ```
 
 4. If tests fail:
    - Read the failure output
-   - Fix `page.tsx` only — do not modify test file
+   - Fix `app/page.tsx` only — do not modify the test file
    - Re-run — max 3 fix attempts
-   - If still failing → report to orchestrator with failure details
+   - If still failing after 3 attempts → report to orchestrator with failure details
 
-5. If tests pass → capture a screenshot:
-   ```bash
-   # Playwright captures this automatically on last test
-   ```
+5. If tests pass → capture a screenshot using Playwright's screenshot API in the last test.
    Save to `logs/{name}-ui-screenshot.png`
 
 6. Stop the dev server:
    ```bash
+   # Windows:
+   Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess -Force
+   # Linux/Mac:
    kill $(lsof -t -i:3000)
    ```
 
@@ -74,7 +81,7 @@ Write and run Playwright tests for the calculator's React page — verify the UI
 ```json
 {
   "status": "pass" | "fail",
-  "test_file": "/ui/tests/israeli-income-tax/page.test.ts",
+  "test_file": "calculators/basic-calculator/playwright.test.ts",
   "tests_total": 3,
   "tests_passed": 3,
   "fix_attempts": 0,

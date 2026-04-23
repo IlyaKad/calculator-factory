@@ -123,8 +123,9 @@ export default function IncomeTaxPage() {
 - `'use client'` at the top — always, calculators are interactive
 - Import types from `logic.ts` — never duplicate type definitions
 - No calculation logic — if you're doing math, it belongs in logic.ts
-- Minimal styling — this is a generated scaffold, not a polished UI
-- Always handle loading, error, and result states
+- **Follow the architect's UI Design section exactly** — implement the specified layout, color scheme, and components. Never produce unstyled or bare HTML.
+- Use Tailwind CSS for all styling — no inline `style={{}}`, no CSS modules unless specified by the architect
+- Always handle loading, error, and result states visually — use distinct styles for each state
 
 ---
 

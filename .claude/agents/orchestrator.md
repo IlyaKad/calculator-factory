@@ -75,11 +75,23 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 ## Steps
 
 ### Step 0a — Preflight: verify required connections
-Check Notion MCP, GitHub (`gh auth status`), Slack MCP, and Docker (`docker info`).
-- **Notion and GitHub are blocking** — if either fails, stop and tell the user what to fix.
-- Slack and Docker are non-blocking — warn the user but continue; publisher will handle missing ones.
+Check all 4 integrations in parallel:
+- **Notion MCP** — attempt to fetch the ticket by ID. If it fails → STOP, tell user to fix Notion MCP.
+- **GitHub MCP** — call `mcp__github__search_repositories` with query `calculator-factory`. If it fails → STOP, tell user to fix GitHub MCP. Note: the agency uses the **GitHub MCP** (not `gh` CLI) for all GitHub operations.
+- **Slack MCP** — search for the `#claude` channel. If it fails → warn, continue (non-blocking).
+- **Docker** — run `docker info`. If it fails → warn, continue (non-blocking).
 
-Show a one-line status per integration before proceeding (`✓` / `⚠`).
+After running all checks, use `AskUserQuestion` to show results to the user in this format:
+```
+Preflight check:
+  ✓ Notion MCP — connected
+  ✓ GitHub MCP — connected
+  ⚠ Slack MCP — not reachable (Slack announcement will be skipped)
+  ⚠ Docker — not running (Docker build will be skipped)
+
+Proceed with build?
+```
+**Do not continue until the user confirms.** If Notion or GitHub failed, do not offer a "Proceed" option — tell the user what to fix and stop.
 
 ---
 
@@ -107,7 +119,20 @@ Wait for `fetch-agent` output. If `missing_unresolved[]` is non-empty → stop p
 ### Step 3 — Design architecture
 Spawn `architect`. Pass full ticket spec + fetch-agent resolved data if applicable.
 Wait for design document.
-Get user confirmation on design before proceeding. If user requests changes → update architect prompt with requested changes and respawn until user approves.
+
+**Present the full design document to the user using `AskUserQuestion`:**
+```
+Here is the architect's design for {calculator_name}:
+
+{full design document — interfaces, function signature, formula outline, guards checklist, UI design}
+
+Do you approve this design, or do you have changes?
+```
+Wait for the user's response.
+- If approved → continue.
+- If changes requested → apply the requested changes to the architect prompt and respawn the architect. Re-present the updated design. Repeat until the user explicitly approves.
+- **Do not proceed to builder until the user says "approved" or equivalent.**
+
 Once approved → record the decision in `.claude/memory.json` under `decisions[]`:
 ```json
 {
@@ -251,7 +276,10 @@ Structured completion summary returned to the prompt file:
 
 ## Tools Allowed
 
-[write, edit, read, Glob, Grep, agent]
+- Read, Write, Edit, Glob, Grep
+- Agent (to spawn sub-agents)
+- AskUserQuestion — **required** for preflight confirmation, architect approval, and UI review pauses
+- Bash (for `git` commands and `docker info` only)
 
 ---
 
