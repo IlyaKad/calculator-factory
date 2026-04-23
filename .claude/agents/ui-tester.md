@@ -40,10 +40,9 @@ Write and run Playwright tests for the calculator's React page — verify the UI
    Wait for server to be ready (check for "ready" in output), max 30 seconds.
    If server fails to start → report to orchestrator, stop.
 
-2. Write `page.test.ts` to `/ui/tests/{name}/page.test.ts`:
-   - **Happy path**: fill all inputs with valid sample data from `ticket_spec.examples[]`, submit, verify result is displayed
-   - **Error state**: submit with empty or invalid inputs, verify error message appears
-   - **Reset**: verify form can be cleared and resubmitted
+2. Write `page.test.ts` to `/ui/tests/{name}/page.test.ts`.
+   Use `ticket_spec.examples[]` as the source of test inputs and expected outputs — do not invent values.
+   Cover the calculator's critical paths: at minimum, a successful calculation, an error state, and any reset/clear behaviour if present.
 
 3. Run Playwright tests:
    ```bash
@@ -96,7 +95,9 @@ Write and run Playwright tests for the calculator's React page — verify the UI
 ---
 
 ## Rules
+- All hard constraints are in `rules.md` — read it before starting
 - Always stop the dev server before reporting — do not leave it running
 - Fix `page.tsx` only if tests fail — never modify the test file
+- **Test locking:** `page.test.ts` is NOT locked — it can be updated as the UI evolves. `logic.test.ts` IS locked — do not touch it.
 - If no examples exist in ticket_spec → use the minimum valid input for each field
 - Max 3 fix attempts — if still failing, report and let orchestrator decide

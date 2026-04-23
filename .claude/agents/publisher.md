@@ -36,7 +36,8 @@ Publish a completed calculator using all 5 MCPs — Notion, Docker, Playwright, 
   "coverage": 82,
   "github_repo": "owner/calculator-factory",
   "slack_channel": "#calculators",
-  "notion_ticket_id": "abc123"
+  "notion_ticket_id": "abc123",
+  "no_pr": false
 }
 ```
 
@@ -81,23 +82,34 @@ Use Playwright MCP to open the calculator UI page in a headless browser.
 Fill in sample inputs, submit, capture a screenshot of the result.
 Save screenshot to `logs/{name}-screenshot.png`.
 
-### 4 — GitHub: commit and push
-Stage all generated files, commit, and push directly to the current branch — do not create a PR:
+### 4 — GitHub: branch, commit, push, and PR
+Create a dedicated branch, commit all generated files, push, then open a draft PR to `main` — unless `no_pr: true` was passed in input.
+
 ```bash
+git checkout -b calc/{calculator-name}
 git add calculators/{name}/
 git commit -m "feat: add {calculator_name} calculator
 
 - {one-line summary from ticket spec}
-- Coverage: {coverage}%
-- Operators: {operator list if applicable}"
-git push origin HEAD
+- Coverage: {coverage}%"
+git push -u origin calc/{calculator-name}
 ```
-If push fails → record in `failures[]` with the exact error, output the commands the user must run manually:
+
+If `no_pr` is false (default) → open a draft PR to `main`:
+```bash
+gh pr create --draft --base main \
+  --title "feat: add {calculator_name} calculator" \
+  --body "Coverage: {coverage}%\n\n{readme first paragraph}"
+```
+
+If push or PR creation fails → record in `failures[]` and output manual recovery commands:
 ```
 Manual recovery:
+  git checkout -b calc/{calculator-name}
   git add calculators/{name}/
   git commit -m "feat: add {calculator_name} calculator"
-  git push origin HEAD
+  git push -u origin calc/{calculator-name}
+  gh pr create --draft --base main --title "feat: add {calculator_name} calculator"
 ```
 
 ### 5 — Slack: post announcement

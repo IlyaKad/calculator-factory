@@ -13,9 +13,9 @@ All flags are optional. Defaults are shown.
 
 | Flag | Default | Description |
 |---|---|---|
-| *(none)* | commit + push | Commit and push to current branch — no PR created |
+| `--no-pr` | off | Skip opening the draft PR after push — branch is pushed but no PR is created |
 
-> The agency **always commits and pushes** — no PR is created unless you manually open one after the build.
+> By default the agency creates a `calc/{name}` branch, commits, pushes, and opens a **draft PR to main**. Pass `--no-pr` to skip the PR step.
 
 ## Input
 $ARGUMENTS — either a Notion ticket ID or the word "batch"
@@ -32,9 +32,11 @@ $ARGUMENTS — either a Notion ticket ID or the word "batch"
    ```json
    {
      "mode": "single" | "batch",
-     "arguments": "$ARGUMENTS"
+     "arguments": "$ARGUMENTS",
+     "no_pr": false
    }
    ```
+   Set `no_pr: true` if `--no-pr` was passed in `$ARGUMENTS`.
 4. Wait for the orchestrator to confirm completion
 5. Report back: calculator name built, files generated, Notion status updated, commit SHA
 

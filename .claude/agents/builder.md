@@ -89,9 +89,9 @@ Build the complete standalone calculator app from the architect design document 
 ---
 
 ## Rules
+- All hard constraints are in `rules.md` — read it before starting
 - Implement the architect design exactly — do not redesign or add features not in the spec
 - If the design is unclear or contradictory, stop and report to orchestrator — do not guess
 - Every guard in the architect's Guards Checklist must be implemented — if a guard is in the design and missing from the code, it is a build failure
-- UI must be beautiful and responsive — no plain HTML, no inline styles. Follow the architect's UI Design section exactly
+- UI must follow the architect's UI Design section — use Tailwind, no inline styles, no unstyled HTML
 - Operator display labels in the UI must always be human-readable — never expose raw API tokens to the user
-- `output: 'standalone'` and `public/` directory are mandatory for every calculator — no exceptions

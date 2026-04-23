@@ -15,6 +15,7 @@ Coordinate the full calculator build pipeline — spawn agents in the right orde
 - Read each agent's `## Input` section before spawning it — that is the handoff contract
 - This agent coordinates only — it does not implement, test, or publish anything itself
 - `.build-state.json` must be kept up to date throughout the run
+- **This agent is the sole owner of `.claude/memory.json`** — no other agent reads or writes it
 
 ---
 
@@ -23,9 +24,11 @@ Handoff from the prompt file:
 ```json
 {
   "mode": "single" | "batch",
-  "arguments": "{ticket-id} | batch"
+  "arguments": "{ticket-id} | batch",
+  "no_pr": false
 }
 ```
+`no_pr` defaults to `false` — pass it through to the publisher unchanged.
 
 ---
 
@@ -71,24 +74,12 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 
 ## Steps
 
-### Step 0a — Preflight: verify all required connections
-Before doing anything else, verify every integration that will be needed is reachable.
+### Step 0a — Preflight: verify required connections
+Check Notion MCP, GitHub (`gh auth status`), Slack MCP, and Docker (`docker info`).
+- **Notion and GitHub are blocking** — if either fails, stop and tell the user what to fix.
+- Slack and Docker are non-blocking — warn the user but continue; publisher will handle missing ones.
 
-Run these checks:
-1. **Notion MCP** — fetch the workspace root or any page. If it fails → stop, tell user: "Notion MCP is not connected. Check your MCP config."
-2. **GitHub** — run `gh auth status`. If it fails → stop, tell user: "GitHub CLI is not authenticated. Run `gh auth login` first."
-3. **Slack MCP** — send a test ping (list channels). If it fails → warn user, but do not stop (Slack is non-blocking)
-4. **Docker** — run `docker info`. If it fails → warn user, but do not stop (Docker failure is non-blocking — publisher will record it)
-
-Report preflight results as a short table before proceeding:
-```
-✓ Notion — connected
-✓ GitHub — authenticated as IlyaKad
-⚠ Slack — not reachable (will skip Slack step)
-✓ Docker — running
-```
-
-If any **blocking** check fails (Notion or GitHub) → stop immediately. Do not write `.build-state.json` or proceed.
+Show a one-line status per integration before proceeding (`✓` / `⚠`).
 
 ---
 
@@ -198,6 +189,7 @@ Spawn `publisher`. Pass:
 - Slack channel target
 - Notion ticket ID
 - `build_warnings[]` — full list of collected warnings from all agents
+- `no_pr` — from input handoff
 
 Wait for publisher confirmation:
 - Notion status updated → "Built"

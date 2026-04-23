@@ -61,5 +61,6 @@ Write the README.md for a completed calculator — covering purpose, inputs, out
 ---
 
 ## Rules
+- All hard constraints are in `rules.md` — read it before starting
 - Do not read `logic.ts` — write from the spec and design doc only
 - Keep README under 150 lines — it is a usage guide, not a tutorial
