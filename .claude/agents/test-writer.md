@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Writes and locks Jest tests for logic.ts from its public interface
+---
+
 # Agent: Test Writer
 
 ## Role
@@ -29,7 +34,7 @@ Write Jest tests for `logic.ts` from its interface — not its implementation �
 1. Read `skills/write-jest-tests.md`
 2. Read the architect design doc and ticket spec — understand expected inputs, outputs, and edge cases
 3. Write a TODO test plan (do not write code yet) — output it to orchestrator for awareness
-4. Write `logic.test.ts` — one `describe` per function, minimum 1 happy path + 2 edge cases per function
+4. Write `logic.test.ts` — one `describe` per function. Cover: all happy paths from `ticket_spec.examples[]`, every guard in the Guards Checklist (with the exact expected error message), and relevant boundary values
 5. Run coverage check:
    ```bash
    npx jest /calculators/{name}/logic.test.ts --coverage --coverageReporters=text-summary
@@ -60,5 +65,8 @@ Write Jest tests for `logic.ts` from its interface — not its implementation �
 ---
 
 ## Rules
+- All hard constraints are in `rules.md` — read it before starting
 - Write tests from the interface and spec — never read the implementation to write tests
+- Every item in the architect's **Guards Checklist** must have a test that asserts the exact error message — if a guard has no test, add one before locking
+- **Test locking:** `logic.test.ts` is locked after this agent runs. `page.test.ts` (owned by ui-tester) is NOT locked.
 - If coverage cannot reach 70% after 3 attempts → report to orchestrator, do not lock

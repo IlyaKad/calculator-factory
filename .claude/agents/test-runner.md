@@ -1,3 +1,8 @@
+---
+model: claude-sonnet-4-6
+description: Runs locked Jest tests and fixes logic.ts until all pass
+---
+
 # Agent: Test Runner
 
 ## Role
@@ -70,5 +75,7 @@ From orchestrator:
 ---
 
 ## Rules
+- All hard constraints are in `rules.md` — read it before starting
+- Fix `logic.ts` only — `logic.test.ts` is locked read-only after test-writer runs
 - If a test seems wrong, do not skip or comment it out — report it to the orchestrator
 - Max 5 fix attempts — do not loop indefinitely

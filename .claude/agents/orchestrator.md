@@ -1,3 +1,8 @@
+---
+model: claude-opus-4-7
+description: Coordinates the full build pipeline — uses Opus for high-stakes planning and routing decisions
+---
+
 # Agent: Orchestrator
 
 ## Role
@@ -10,6 +15,7 @@ Coordinate the full calculator build pipeline — spawn agents in the right orde
 - Read each agent's `## Input` section before spawning it — that is the handoff contract
 - This agent coordinates only — it does not implement, test, or publish anything itself
 - `.build-state.json` must be kept up to date throughout the run
+- **This agent is the sole owner of `.claude/memory.json`** — no other agent reads or writes it
 
 ---
 
@@ -18,9 +24,11 @@ Handoff from the prompt file:
 ```json
 {
   "mode": "single" | "batch",
-  "arguments": "{ticket-id} | batch"
+  "arguments": "{ticket-id} | batch",
+  "no_pr": false
 }
 ```
+`no_pr` defaults to `false` — pass it through to the publisher unchanged.
 
 ---
 
@@ -41,6 +49,17 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 1. Verify the output matches the agent's `## Output` section
 2. Update `.build-state.json` with current status
 3. Pass relevant output forward to the next agent's handoff
+4. Collect any `warnings[]` from the agent output into a running `build_warnings[]` list. Tag each entry with the agent name:
+   ```json
+   { "agent": "test-runner", "warning": "Required 3 fix attempts before all tests passed" }
+   ```
+   Warnings to watch for per agent:
+   - **test-runner**: `fix_attempts > 0` → "Required N fix attempts before all tests passed"
+   - **test-writer**: `coverage` between 70–80% → "Coverage is N% — consider adding more edge case tests"
+   - **ui-tester**: `fix_attempts > 0` → "UI required N fix attempts"
+   - **simplify**: if simplification was reverted → "Simplification reverted — tests failed after simplify"
+   - **publisher**: any entry in `failures[]` → forward as-is
+   - **builder**: `split_files` non-empty → "Logic split into N files due to size"
 
 ### Failure handling
 - If any agent fails → retry once
@@ -55,7 +74,16 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 
 ## Steps
 
-### Step 0 — Read memory
+### Step 0a — Preflight: verify required connections
+Check Notion MCP, GitHub (`gh auth status`), Slack MCP, and Docker (`docker info`).
+- **Notion and GitHub are blocking** — if either fails, stop and tell the user what to fix.
+- Slack and Docker are non-blocking — warn the user but continue; publisher will handle missing ones.
+
+Show a one-line status per integration before proceeding (`✓` / `⚠`).
+
+---
+
+### Step 0b — Read memory
 Read `.claude/memory.json`.
 Check `calculators[]` for an entry matching this `ticket_id` with `status: "built"`.
 If found → stop, report to user: "This calculator was already built on {build_time}. Use `/build-calculator` with a different ticket or pass `--force` to rebuild."
@@ -140,7 +168,13 @@ If status is `"pass"` → use the screenshot path for the publisher handoff.
 ---
 
 ### Step 7 — Write documentation
-Spawn `docs-writer`. Pass ticket spec, architect design doc, builder file list, unit test coverage, UI screenshot path.
+Spawn `docs-writer`. Pass:
+- ticket spec
+- architect design doc
+- builder file list
+- unit test coverage percentage
+- `screenshot_path` from ui-tester output (required — docs-writer will embed it in the README)
+
 Wait for README.md confirmation.
 
 ---
@@ -154,6 +188,8 @@ Spawn `publisher`. Pass:
 - GitHub repo details
 - Slack channel target
 - Notion ticket ID
+- `build_warnings[]` — full list of collected warnings from all agents
+- `no_pr` — from input handoff
 
 Wait for publisher confirmation:
 - Notion status updated → "Built"

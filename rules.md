@@ -25,10 +25,10 @@ If a rule conflicts with an instruction, the rule wins — surface the conflict 
 
 ## Git / Release Rules
 
-- NEVER push directly to main — always open a PR
-- ALWAYS create PRs as draft first
+- Publisher ALWAYS creates a dedicated branch `calc/{calculator-name}` for each build, commits all generated files, and pushes it
+- A draft PR from that branch to `main` is opened automatically — unless the `--no-pr` flag was passed to `/build-calculator`
+- NEVER commit directly to `main`
 - NEVER create a GitHub release if any test is failing
-- PR must not exceed 100 lines changed unless explicitly instructed otherwise
 - Every PR must be a working, self-contained unit — never commit a half-built feature that breaks the build
 - Commits must be atomic and descriptive — one logical change per commit
 
@@ -39,7 +39,7 @@ If a rule conflicts with an instruction, the rule wins — surface the conflict 
 - NEVER invent business rules, formulas, or tax brackets not present in the Notion ticket or fetched URLs
 - If a ticket is ambiguous or missing required fields — STOP and report what is missing, do not guess
 - NEVER use data from a source not referenced in the Notion ticket
-- The `missing[]` field in the ticket-reader output is blocking — orchestrator must not proceed past architect if `missing` is non-empty
+- The `missing[]` field in the ticket-reader output is blocking — the architect is responsible for stopping and reporting all missing items before producing a design doc
 
 ---
 
