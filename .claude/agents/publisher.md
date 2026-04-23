@@ -22,6 +22,9 @@ Publish a completed calculator using all 5 MCPs — Notion, Docker, Playwright, 
 {
   "calculator_name": "israeli-income-tax",
   "ticket_id": "abc123",
+  "build_warnings": [
+    { "agent": "test-runner", "warning": "Required 3 fix attempts before all tests passed" }
+  ],
   "files": [
     "/calculators/israeli-income-tax/logic.ts",
     "/calculators/israeli-income-tax/logic.test.ts",
@@ -43,7 +46,19 @@ Publish a completed calculator using all 5 MCPs — Notion, Docker, Playwright, 
 
 ### 1 — Notion: update ticket status
 Use Notion MCP to set ticket status → "Built".
-Add links to generated files in the ticket body.
+Update the ticket body with:
+- Links to all generated files
+- Coverage percentage
+- Commit SHA and branch link
+- **Build Notes section** — if `build_warnings[]` is non-empty, append a "⚠️ Build Notes" section listing each warning with its agent name. If empty, omit the section entirely. Example:
+
+  ```
+  ⚠️ Build Notes
+  • test-runner: Required 3 fix attempts before all tests passed
+  • publisher: Slack MCP not reachable — Slack notification skipped
+  ```
+
+  These are non-critical — the build succeeded — but useful context for the ticket reviewer.
 
 ### 2 — Docker: build and verify container
 Build Docker image for the calculator:

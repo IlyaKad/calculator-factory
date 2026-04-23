@@ -46,6 +46,17 @@ ticket-reader → [fetch-agent] → architect → builder → test-writer → do
 1. Verify the output matches the agent's `## Output` section
 2. Update `.build-state.json` with current status
 3. Pass relevant output forward to the next agent's handoff
+4. Collect any `warnings[]` from the agent output into a running `build_warnings[]` list. Tag each entry with the agent name:
+   ```json
+   { "agent": "test-runner", "warning": "Required 3 fix attempts before all tests passed" }
+   ```
+   Warnings to watch for per agent:
+   - **test-runner**: `fix_attempts > 0` → "Required N fix attempts before all tests passed"
+   - **test-writer**: `coverage` between 70–80% → "Coverage is N% — consider adding more edge case tests"
+   - **ui-tester**: `fix_attempts > 0` → "UI required N fix attempts"
+   - **simplify**: if simplification was reverted → "Simplification reverted — tests failed after simplify"
+   - **publisher**: any entry in `failures[]` → forward as-is
+   - **builder**: `split_files` non-empty → "Logic split into N files due to size"
 
 ### Failure handling
 - If any agent fails → retry once
@@ -186,6 +197,7 @@ Spawn `publisher`. Pass:
 - GitHub repo details
 - Slack channel target
 - Notion ticket ID
+- `build_warnings[]` — full list of collected warnings from all agents
 
 Wait for publisher confirmation:
 - Notion status updated → "Built"
