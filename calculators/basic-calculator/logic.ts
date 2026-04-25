@@ -61,6 +61,8 @@ export function calculateBasicCalculator(
       result = (a / 100) * b
       expression = `${a}% of ${b} = ${result}`
       break
+    default:
+      throw new Error(`Unsupported operator: ${operator}`)
   }
 
   return { result, expression }

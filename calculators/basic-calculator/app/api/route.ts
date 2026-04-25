@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  calculateBasicCalculator,
-  BasicCalculatorInput,
-} from '../../logic'
+import { calculateBasicCalculator, BasicCalculatorInput } from '../../logic'
 
 export async function POST(req: NextRequest) {
   try {

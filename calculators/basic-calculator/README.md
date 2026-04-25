@@ -8,7 +8,7 @@ a pure TypeScript logic core, a thin API route, and a React UI.
 
 ## Screenshot
 
-<!-- screenshot not available -->
+![Calculator UI](../../logs/basic-calculator-ui-screenshot.png)
 
 ## Inputs
 
@@ -58,14 +58,15 @@ a pure TypeScript logic core, a thin API route, and a React UI.
 ## UI
 
 - Dev: `npm run dev` then open `http://localhost:3000`.
-- The UI has two number inputs, a 6-button operator selector (`+`, `-`, `×`,
-  `÷`, `mod`, `% of`), a Calculate button, and a Reset button. Result and
-  errors are shown below the form.
-- Raw token `pct` is never exposed to the user — it shows `% of`.
+- Dark slate number-pad calculator. Enter `a` with the digit buttons, click an
+  operator (`+` `−` `×` `÷` `%` `mod`), enter `b`, then press `=`.
+- After a result: pressing an operator chains the result as the new `a`.
+  Press Reset to start over.
+- Raw token `pct` is never shown — the `%` operator button sends `pct` to the API.
 
 ## Tests
 
-- Coverage: **100%** (17 Jest tests covering happy paths, every guard,
+- Coverage: **97%** (17 Jest tests covering happy paths, every guard,
   and zero-operand boundaries).
 - Run locally:
   ```bash
