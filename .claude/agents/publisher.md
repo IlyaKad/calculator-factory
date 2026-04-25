@@ -82,34 +82,31 @@ Use Playwright MCP to open the calculator UI page in a headless browser.
 Fill in sample inputs, submit, capture a screenshot of the result.
 Save screenshot to `logs/{name}-screenshot.png`.
 
-### 4 — GitHub: branch, commit, push, and PR
-Create a dedicated branch, commit all generated files, push, then open a draft PR to `main` — unless `no_pr: true` was passed in input.
+### 4 — GitHub: commit, push, and PR
+Use git (CLI) to commit all generated files and push the branch. Use the **GitHub MCP** (not `gh` CLI) to open the PR — `gh` CLI is not required.
 
 ```bash
-git checkout -b calc/{calculator-name}
 git add calculators/{name}/
 git commit -m "feat: add {calculator_name} calculator
 
 - {one-line summary from ticket spec}
 - Coverage: {coverage}%"
-git push -u origin calc/{calculator-name}
+git push -u origin {current-branch}
 ```
 
-If `no_pr` is false (default) → open a draft PR to `main`:
-```bash
-gh pr create --draft --base main \
-  --title "feat: add {calculator_name} calculator" \
-  --body "Coverage: {coverage}%\n\n{readme first paragraph}"
-```
+If `no_pr` is false (default) → open a draft PR to `main` using the GitHub MCP:
+- Tool: `mcp__github__create_pull_request`
+- repo: `IlyaKad/calculator-factory`, base: `main`, draft: `true`
+- title: `feat: add {calculator_name} calculator`
+- body: `Coverage: {coverage}%\n\n{readme first paragraph}`
 
 If push or PR creation fails → record in `failures[]` and output manual recovery commands:
 ```
 Manual recovery:
-  git checkout -b calc/{calculator-name}
   git add calculators/{name}/
   git commit -m "feat: add {calculator_name} calculator"
-  git push -u origin calc/{calculator-name}
-  gh pr create --draft --base main --title "feat: add {calculator_name} calculator"
+  git push -u origin {current-branch}
+  # Then open PR via GitHub web UI or gh CLI if available
 ```
 
 ### 5 — Slack: post announcement
@@ -138,12 +135,10 @@ Use Slack MCP to post to the configured channel:
 ---
 
 ## Tools Allowed
-- Notion MCP
-- Docker MCP
-- Playwright MCP
-- GitHub MCP
-- Slack MCP
-- Bash (for docker commands as fallback)
+- Notion MCP (`mcp__85292840-1dd5-4406-822f-daaa0d345afc__*`)
+- GitHub MCP (`mcp__github__*`) — used for PR creation; **do NOT use `gh` CLI**
+- Slack MCP (`mcp__caa06ba3-367b-416c-bf5d-25840aef2db9__*`)
+- Bash (for `docker build`, `docker run`, `git commit`, `git push`)
 
 ---
 
